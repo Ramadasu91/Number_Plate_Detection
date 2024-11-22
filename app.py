@@ -1,25 +1,16 @@
-
-
-# File: streamlit_number_plate_alarm.py
+# File: streamlit_number_plate_recognition.py
 
 import streamlit as st
 import cv2
 import numpy as np
 import easyocr
 from PIL import Image
-import pygame
-import os
-
-# Initialize pygame mixer
-try:
-    pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
-except pygame.error as e:
-    st.warning("Audio playback not supported in this environment.")
+import io
 
 # Define valid number plates
-VALID_NUMBER_PLATES = ["HR.26 BR 9044", "21 BH 2345 AAI", "LMN9876", "DEF5432"]
+VALID_NUMBER_PLATES = ["ABC1234", "XYZ5678", "LMN9876", "DEF5432"]
 
-# Function to process the uploaded image and validate number plate
+# Function to process image and recognize the number plate
 def process_image(uploaded_image):
     try:
         # Convert uploaded file to raw bytes and decode as OpenCV image
@@ -39,7 +30,7 @@ def process_image(uploaded_image):
 
         # Find contours
         keypoints = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        contours = sorted(keypoints[0], key=cv2.contourArea, reverse=True)[:10]
+        contours = sorted(cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0], key=cv2.contourArea, reverse=True)[:10]
 
         location = None
         for contour in contours:
@@ -74,19 +65,14 @@ def process_image(uploaded_image):
         else:
             # Draw a red rectangle if invalid
             cv2.drawContours(img, [location], 0, (0, 0, 255), 3)
-            # Play alarm sound
-            try:
-                pygame.mixer.music.load("mixkit-classic-alarm-995.wav")
-                pygame.mixer.music.play()
-            except pygame.error:
-                st.audio("mixkit-classic-alarm-995.wav", format="audio/wav")
             return img, detected_text, "Invalid Number Plate"
     except Exception as e:
         st.error(f"Error processing the image: {e}")
         st.stop()
 
-# Streamlit app setup
-st.title("Number Plate Recognition and Alarm System")
+
+# Streamlit app
+st.title("Number Plate Recognition")
 
 # File uploader for image
 uploaded_file = st.file_uploader("Upload a number plate image", type=["jpg", "jpeg", "png"])
@@ -99,14 +85,16 @@ if uploaded_file is not None:
     # Process the uploaded image
     processed_image, detected_text, status = process_image(uploaded_file)
 
-    # Display results
+    # Display result
     if status == "Valid Number Plate":
         st.success(f"Number Plate Detected: {detected_text} (Valid)")
     elif status == "Invalid Number Plate":
         st.error(f"Number Plate Detected: {detected_text} (Invalid)")
-        st.warning("Alarm Sound Triggered: Invalid Number Plate")
+        st.warning("Alarm Sound: Invalid Number Plate")
+        # Play alarm sound (if supported)
+        st.audio("mixkit-classic-alarm-995.wav", format="audio/wav")
     else:
         st.error(status)
 
-    # Display the processed image with annotations
+    # Display the processed image
     st.image(cv2.cvtColor(processed_image, cv2.COLOR_BGR2RGB), caption="Processed Image", use_column_width=True)
