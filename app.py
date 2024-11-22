@@ -8,7 +8,7 @@ from PIL import Image
 import io
 
 # Define valid number plates
-VALID_NUMBER_PLATES = ["HR.26 BR 9044", "RJ14CV0002", "LMN9876", "DEF5432"]
+VALID_NUMBER_PLATES = ["HR.26 BR 9044", 21 BH 2345 AAI", "LMN9876", "DEF5432"]
 
 # Function to process image and recognize the number plate
 def process_image(uploaded_image):
