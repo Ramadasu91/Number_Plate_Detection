@@ -92,7 +92,7 @@ if uploaded_file is not None:
         st.error(f"Number Plate Detected: {detected_text} (Invalid)")
         st.warning("Alarm Sound: Invalid Number Plate")
         # Play alarm sound (if supported)
-        st.audio("alarm.mp3", format="audio/mp3")
+        st.audio("mixkit-classic-alarm-995.wav", format="audio/wav")
     else:
         st.error(status)
 
