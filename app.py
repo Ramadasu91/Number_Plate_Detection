@@ -4,11 +4,14 @@ import streamlit as st
 import cv2
 import numpy as np
 import easyocr
-from playsound import playsound
+import pygame
 from PIL import Image
 
 # Define valid number plates
 VALID_NUMBER_PLATES = ["HR.26 BR 9044", "21 BH 2345 AAI", "LMN9876", "DEF5432"]
+
+# Initialize pygame mixer for playing sounds
+pygame.mixer.init()
 
 # Function to process the uploaded image and validate number plate
 def process_image(uploaded_image):
@@ -65,11 +68,14 @@ def process_image(uploaded_image):
         else:
             # Draw a red rectangle if invalid
             cv2.drawContours(img, [location], 0, (0, 0, 255), 3)
-            playsound("mixkit-classic-alarm-995.wav")  # Play the alarm sound
+            # Play alarm sound
+            pygame.mixer.music.load("mixkit-classic-alarm-995.wav")
+            pygame.mixer.music.play()
             return img, detected_text, "Invalid Number Plate"
     except Exception as e:
         st.error(f"Error processing the image: {e}")
         st.stop()
+
 
 # Streamlit app setup
 st.title("Number Plate Recognition and Alarm System")
